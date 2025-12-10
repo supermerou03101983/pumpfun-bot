@@ -1,0 +1,162 @@
+# PumpFun Bot Configuration Template
+# Copy this to config.yaml and fill in your values
+
+# Trading Mode (MANDATORY)
+# - "paper": Simulate all trades (NO real transactions) — SAFE DEFAULT
+# - "live": Execute real trades (requires LIVE_MODE_CONFIRMED=true in ENV)
+trading_mode: paper
+
+# Solana RPC Configuration
+solana:
+  # Primary RPC (Helius recommended for reliability)
+  rpc_url: "https://mainnet.helius-rpc.com/?api-key=YOUR_HELIUS_KEY"
+
+  # WebSocket endpoint (for real-time updates)
+  ws_url: "wss://mainnet.helius-rpc.com/?api-key=YOUR_HELIUS_KEY"
+
+  # Backup RPC (falls back if primary fails)
+  backup_rpc_url: "https://api.mainnet-beta.solana.com"
+
+# Helius Webhooks (for token detection)
+helius:
+  api_key: "YOUR_HELIUS_API_KEY"
+
+  # Webhook ID (created automatically on first run)
+  webhook_id: null
+
+  # Webhook endpoint (your VPS public IP + port)
+  webhook_url: "http://YOUR_VPS_IP:8080/webhook"
+
+# DexScreener (fallback detection)
+dexscreener:
+  enabled: true
+  poll_interval_seconds: 5
+
+# Redis Configuration
+redis:
+  host: "localhost"
+  port: 6379
+  db: 0
+  password: null  # Set if you enable Redis auth
+
+# Strategy Parameters
+strategy:
+  # Detection
+  max_token_age_seconds: 12  # Must detect within 12 sec of first buy
+
+  # Entry
+  entry_amount_sol: 0.1
+  entry_slippage_bps: 2000  # 20%
+  priority_fee_lamports: 400000  # 0.0004 SOL
+
+  # Exit (Take Profit)
+  take_profit_percentage: 50  # Sell 50% of position
+  take_profit_target: 50      # When profit reaches +50%
+
+  # Exit (Trailing Stop)
+  trailing_stop_enabled: true
+  trailing_stop_activation: 100  # Activate at +100% profit
+  trailing_stop_percentage: 15   # Trail 15% below peak
+
+  # Exit (Time-based)
+  max_hold_time_minutes: 90
+
+  # Exit (Volume-based)
+  volume_drop_threshold: 80  # Exit if volume drops >80%
+
+# Filters (must pass ALL to trade)
+filters:
+  # Minimum first buy size
+  min_first_buy_sol: 0.5
+
+  # Mint authority must be renounced
+  require_mint_renounced: true
+
+  # Maximum sell tax
+  max_sell_tax_percent: 15
+
+  # Must be able to simulate successful sell
+  require_sell_simulation: true
+
+  # Minimum liquidity in bonding curve
+  min_liquidity_sol: 1.0
+
+  # Name filters (case-insensitive, reject if ANY match)
+  banned_name_keywords:
+    - "test"
+    - "rug"
+    - "scam"
+    - "fake"
+    - "honeypot"
+    - "dev"
+    - "deployer"
+    - "migration"
+
+# Logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+
+  # Log to file
+  file_enabled: true
+  file_path: "logs/pumpfun_bot.log"
+
+  # JSON format (for Grafana/Loki)
+  json_format: true
+
+  # Rotate logs
+  max_file_size_mb: 100
+  backup_count: 5
+
+# Dashboard
+dashboard:
+  enabled: true
+  host: "0.0.0.0"  # Listen on all interfaces
+  port: 8501
+  auto_refresh_seconds: 5
+
+# Health Check
+health:
+  enabled: true
+  port: 8080
+  path: "/health"
+
+# Pump.fun Program ID (mainnet)
+pumpfun:
+  program_id: "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P"
+
+  # Bonding curve parameters
+  bonding_curve:
+    initial_virtual_sol_reserves: 30
+    initial_virtual_token_reserves: 1073000000
+    initial_real_token_reserves: 793100000
+
+# Security
+security:
+  # Path to encrypted wallet (created by encrypt_key.py)
+  encrypted_wallet_path: "config/trading_wallet.enc"
+
+  # Age public key (hardcoded in security.py, regenerate if you change age keypair)
+  age_public_key: "age1qyqszqgpqyqszqgpqyqszqgpqyqszqgpqyqszqgpqyqszqgpqsqzcwqr"
+
+  # Wallet decryption timeout (seconds, key wiped from RAM after)
+  key_lifetime_seconds: 30
+
+# Rate Limiting (prevent spam)
+rate_limits:
+  max_trades_per_minute: 10
+  max_rpc_calls_per_second: 50
+
+# Paper Trading (simulation parameters)
+paper_trading:
+  # Starting balance (SOL)
+  initial_balance_sol: 10.0
+
+  # Slippage simulation (percentage added to entry, subtracted from exit)
+  simulated_slippage_percent: 2.5
+
+  # Fee simulation
+  simulated_network_fee_sol: 0.00001
+  simulated_priority_fee_sol: 0.0004
+
+  # Tax simulation (applied if token has tax)
+  apply_token_tax: true

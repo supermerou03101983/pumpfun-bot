@@ -1,0 +1,38 @@
+[Unit]
+Description=PumpFun Trading Bot
+After=network.target redis-server.service
+Wants=redis-server.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/pumpfun-bot
+Environment="PATH=/opt/pumpfun-bot/venv/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="PYTHONUNBUFFERED=1"
+
+# Start the bot
+ExecStart=/opt/pumpfun-bot/venv/bin/python -m src.main
+
+# Restart policy
+Restart=always
+RestartSec=10
+StartLimitInterval=0
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=pumpfun-bot
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/pumpfun-bot/logs
+
+# Resource limits
+LimitNOFILE=65536
+MemoryLimit=2G
+
+[Install]
+WantedBy=multi-user.target

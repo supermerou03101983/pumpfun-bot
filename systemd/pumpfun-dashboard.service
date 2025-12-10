@@ -1,0 +1,41 @@
+[Unit]
+Description=PumpFun Dashboard (Streamlit)
+After=network.target redis-server.service pumpfun-bot.service
+Wants=redis-server.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/pumpfun-bot
+Environment="PATH=/opt/pumpfun-bot/venv/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="PYTHONUNBUFFERED=1"
+
+# Start Streamlit dashboard
+ExecStart=/opt/pumpfun-bot/venv/bin/streamlit run src/dashboard/app.py \
+    --server.port=8501 \
+    --server.address=0.0.0.0 \
+    --server.headless=true \
+    --browser.gatherUsageStats=false
+
+# Restart policy
+Restart=always
+RestartSec=10
+StartLimitInterval=0
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=pumpfun-dashboard
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+
+# Resource limits
+LimitNOFILE=65536
+MemoryLimit=1G
+
+[Install]
+WantedBy=multi-user.target
