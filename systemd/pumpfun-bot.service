@@ -9,7 +9,7 @@ User=root
 WorkingDirectory=/opt/pumpfun-bot
 Environment="PATH=/opt/pumpfun-bot/venv/bin:/usr/local/bin:/usr/bin:/bin"
 Environment="PYTHONUNBUFFERED=1"
-Environment="AGE_IDENTITIES_FILE=/root/.config/sops/age/keys.txt"
+Environment="AGE_IDENTITIES_FILE=/opt/pumpfun-bot/.age/keys.txt"
 
 # Start the bot
 ExecStart=/opt/pumpfun-bot/venv/bin/python -m src.main
@@ -30,6 +30,7 @@ PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
 ReadWritePaths=/opt/pumpfun-bot/logs
+ReadWritePaths=/opt/pumpfun-bot/.age
 
 # Resource limits
 LimitNOFILE=65536

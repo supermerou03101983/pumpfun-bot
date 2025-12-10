@@ -79,7 +79,7 @@ class SecurityManager:
             # Use environment variable AGE_IDENTITIES_FILE if set, otherwise use default path
             age_key_file = os.environ.get(
                 "AGE_IDENTITIES_FILE",
-                os.path.expanduser("~/.config/sops/age/keys.txt")
+                "/opt/pumpfun-bot/.age/keys.txt"
             )
 
             result = subprocess.run(

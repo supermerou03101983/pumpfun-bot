@@ -123,8 +123,8 @@ cd "$INSTALL_DIR"
 
 mkdir -p "$INSTALL_DIR/config"
 mkdir -p "$INSTALL_DIR/logs"
-mkdir -p "$HOME/.config/sops/age"
-chmod 700 "$HOME/.config/sops/age"
+mkdir -p "$INSTALL_DIR/.age"
+chmod 700 "$INSTALL_DIR/.age"
 
 log_success "Project directory ready at $INSTALL_DIR"
 
@@ -147,7 +147,7 @@ log_success "Python dependencies installed"
 # 4. Configuration age (génération de clés)
 log_info "Setting up age encryption..."
 
-AGE_KEY_FILE="$HOME/.config/sops/age/keys.txt"
+AGE_KEY_FILE="$INSTALL_DIR/.age/keys.txt"
 if [[ ! -f "$AGE_KEY_FILE" ]]; then
     log_info "Generating new age keypair..."
     age-keygen -o "$AGE_KEY_FILE" 2>/dev/null
