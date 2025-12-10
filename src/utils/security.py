@@ -10,7 +10,7 @@ Handles:
 import os
 import subprocess
 import tempfile
-from typing import Optional
+from typing import Optional, Dict
 from pathlib import Path
 import structlog
 from solders.keypair import Keypair
@@ -75,9 +75,15 @@ class SecurityManager:
             )
 
         try:
-            # Decrypt wallet using age
+            # Decrypt wallet using age with identity file
+            # Use environment variable AGE_IDENTITIES_FILE if set, otherwise use default path
+            age_key_file = os.environ.get(
+                "AGE_IDENTITIES_FILE",
+                os.path.expanduser("~/.config/sops/age/keys.txt")
+            )
+
             result = subprocess.run(
-                ["age", "--decrypt", self.encrypted_wallet_path],
+                ["age", "--decrypt", "-i", age_key_file, self.encrypted_wallet_path],
                 capture_output=True,
                 check=True,
                 text=True,
