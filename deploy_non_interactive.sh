@@ -96,14 +96,30 @@ log_success "System dependencies installed (Python ${PYTHON_VERSION})"
 # 2. Configuration du répertoire du projet
 log_info "Setting up project directory..."
 
-if [[ "$SCRIPT_DIR" != "$INSTALL_DIR" ]]; then
-    log_info "Copying project files to $INSTALL_DIR..."
-    mkdir -p "$INSTALL_DIR"
-    cp -r "$SCRIPT_DIR"/* "$INSTALL_DIR/"
-    cd "$INSTALL_DIR"
+# Cloner le repo si nécessaire
+if [[ ! -d "$INSTALL_DIR" ]]; then
+    log_info "Cloning repository from GitHub..."
+    git clone https://github.com/supermerou03101983/pumpfun-bot.git "$INSTALL_DIR" || {
+        log_error "Failed to clone repository"
+        exit 1
+    }
+    log_success "Repository cloned to $INSTALL_DIR"
+elif [[ ! -f "$INSTALL_DIR/requirements.txt" ]]; then
+    # Le dossier existe mais est vide, cloner dedans
+    log_info "Cloning repository..."
+    rm -rf "$INSTALL_DIR"
+    git clone https://github.com/supermerou03101983/pumpfun-bot.git "$INSTALL_DIR" || {
+        log_error "Failed to clone repository"
+        exit 1
+    }
+    log_success "Repository cloned to $INSTALL_DIR"
 else
+    log_info "Directory $INSTALL_DIR already exists, pulling latest changes..."
     cd "$INSTALL_DIR"
+    git pull origin main || log_warn "Could not pull latest changes (continuing anyway)"
 fi
+
+cd "$INSTALL_DIR"
 
 mkdir -p "$INSTALL_DIR/config"
 mkdir -p "$INSTALL_DIR/logs"
