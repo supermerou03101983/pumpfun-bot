@@ -80,25 +80,44 @@ install_system_deps() {
     export DEBIAN_FRONTEND=noninteractive
 
     apt-get update -qq
+
+    # Detect available Python version
+    if apt-cache show python3.12 >/dev/null 2>&1; then
+        PYTHON_VERSION="3.12"
+        log_info "Detected Python 3.12 (Ubuntu 24.04)"
+    elif apt-cache show python3.11 >/dev/null 2>&1; then
+        PYTHON_VERSION="3.11"
+        log_info "Detected Python 3.11 (Ubuntu 22.04)"
+    else
+        PYTHON_VERSION="3"
+        log_warn "Using default python3"
+    fi
+
+    # Install system packages
     apt-get install -y -qq \
         software-properties-common \
         build-essential \
         curl \
         git \
         redis-server \
-        python3.11 \
-        python3.11-venv \
-        python3.11-dev \
+        python${PYTHON_VERSION} \
+        python${PYTHON_VERSION}-venv \
+        python${PYTHON_VERSION}-dev \
         python3-pip \
         jq \
         age \
         || { log_error "Failed to install system dependencies"; exit 1; }
 
+    # Create python3 symlink if needed
+    if [ "$PYTHON_VERSION" != "3" ]; then
+        update-alternatives --install /usr/bin/python3 python3 /usr/bin/python${PYTHON_VERSION} 1 2>/dev/null || true
+    fi
+
     # Start Redis
     systemctl enable redis-server
     systemctl start redis-server
 
-    log_success "System dependencies installed"
+    log_success "System dependencies installed (Python ${PYTHON_VERSION})"
 }
 
 ################################################################################
@@ -138,9 +157,20 @@ setup_venv() {
 
     cd "$INSTALL_DIR"
 
+    # Detect Python version if not already set
+    if [[ -z "${PYTHON_VERSION:-}" ]]; then
+        if command -v python3.12 &> /dev/null; then
+            PYTHON_VERSION="3.12"
+        elif command -v python3.11 &> /dev/null; then
+            PYTHON_VERSION="3.11"
+        else
+            PYTHON_VERSION="3"
+        fi
+    fi
+
     if [[ ! -d "venv" ]]; then
-        python3.11 -m venv venv
-        log_success "Virtual environment created"
+        python${PYTHON_VERSION} -m venv venv
+        log_success "Virtual environment created with Python ${PYTHON_VERSION}"
     else
         log_warn "Virtual environment already exists, skipping creation"
     fi
