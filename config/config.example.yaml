@@ -44,8 +44,8 @@ redis:
 
 # Strategy Parameters
 strategy:
-  # Detection
-  max_token_age_seconds: 12  # Must detect within 12 sec of first buy
+  # Detection (extended window for DexScreener compatibility)
+  max_token_age_seconds: 300  # 5 minutes (DexScreener needs time to list tokens)
 
   # Entry
   entry_amount_sol: 0.1

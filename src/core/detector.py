@@ -276,12 +276,52 @@ class TokenDetector:
             if age_seconds > self.max_token_age:
                 return None
 
+            # Anti-scam filters for DexScreener tokens
+            txns = pair.get("txns", {})
+            volume = pair.get("volume", {})
+
+            # Check 5-minute activity (m5)
+            m5_txns = txns.get("m5", {})
+            m5_buys = m5_txns.get("buys", 0)
+            m5_sells = m5_txns.get("sells", 0)
+            m5_volume = volume.get("m5", 0)
+
+            # Minimum activity filter (at least 3 transactions in last 5 min)
+            total_m5_txns = m5_buys + m5_sells
+            if total_m5_txns < 3:
+                logger.debug(
+                    "Token filtered: insufficient activity",
+                    mint=mint,
+                    m5_txns=total_m5_txns,
+                )
+                return None
+
+            # Minimum volume filter ($50+ in last 5 minutes)
+            if m5_volume < 50:
+                logger.debug(
+                    "Token filtered: low volume",
+                    mint=mint,
+                    m5_volume=m5_volume,
+                )
+                return None
+
+            # Buy/sell ratio filter (at least 30% buys to avoid dump-only tokens)
+            if total_m5_txns > 0:
+                buy_ratio = (m5_buys / total_m5_txns) * 100
+                if buy_ratio < 30:
+                    logger.debug(
+                        "Token filtered: poor buy/sell ratio",
+                        mint=mint,
+                        buy_ratio=buy_ratio,
+                    )
+                    return None
+
             # Get liquidity (approximate first buy)
             liquidity = pair.get("liquidity", {})
             usd_liquidity = liquidity.get("usd", 0)
 
-            # Approximate SOL (assume $100/SOL)
-            sol_liquidity = usd_liquidity / 100
+            # Approximate SOL (assume $140/SOL - updated price)
+            sol_liquidity = usd_liquidity / 140
 
             return {
                 "mint": mint,
@@ -291,6 +331,10 @@ class TokenDetector:
                 "name": base_token.get("name"),
                 "symbol": base_token.get("symbol"),
                 "source": "dexscreener",
+                "m5_volume": m5_volume,
+                "m5_buys": m5_buys,
+                "m5_sells": m5_sells,
+                "buy_ratio": (m5_buys / total_m5_txns * 100) if total_m5_txns > 0 else 0,
             }
 
         except Exception as e:
