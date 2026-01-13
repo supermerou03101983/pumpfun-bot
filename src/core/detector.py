@@ -37,7 +37,7 @@ class TokenDetector:
         # Helius config
         self.helius_api_key = config["helius"]["api_key"]
         self.webhook_id = config["helius"].get("webhook_id")
-        self.webhook_port = config["health"]["port"]  # Use same port as health
+        self.webhook_port = config["helius"].get("webhook_port", 8081)  # Separate port for webhooks
 
         # DexScreener config
         self.dexscreener_enabled = config["dexscreener"]["enabled"]
@@ -384,7 +384,8 @@ if __name__ == "__main__":
         "helius": {
             "api_key": "YOUR_API_KEY",
             "webhook_id": None,
-            "webhook_url": "http://your-server:8080/webhook",
+            "webhook_url": "http://your-server:8081/webhook",
+            "webhook_port": 8081,
         },
         "dexscreener": {"enabled": True, "poll_interval_seconds": 5},
         "pumpfun": {"program_id": "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P"},

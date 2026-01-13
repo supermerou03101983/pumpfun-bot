@@ -25,7 +25,10 @@ helius:
   webhook_id: null
 
   # Webhook endpoint (your VPS public IP + port)
-  webhook_url: "http://YOUR_VPS_IP:8080/webhook"
+  webhook_url: "http://YOUR_VPS_IP:8081/webhook"
+
+  # Webhook server port (separate from health check)
+  webhook_port: 8081
 
 # DexScreener (fallback detection)
 dexscreener:
