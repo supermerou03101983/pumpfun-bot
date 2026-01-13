@@ -261,10 +261,14 @@ class TokenDetector:
             if not created_at:
                 return None
 
-            # Convert to timestamp
-            created_timestamp = int(
-                datetime.fromisoformat(created_at.replace("Z", "+00:00")).timestamp()
-            )
+            # Convert to timestamp (pairCreatedAt is in milliseconds)
+            if isinstance(created_at, int):
+                created_timestamp = created_at / 1000  # Convert ms to seconds
+            else:
+                # Handle string format (ISO)
+                created_timestamp = int(
+                    datetime.fromisoformat(created_at.replace("Z", "+00:00")).timestamp()
+                )
 
             age_seconds = time.time() - created_timestamp
 
